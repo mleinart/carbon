@@ -42,19 +42,15 @@ class CarbonClientProtocol(Int32StringReceiver):
 
   def disconnect(self):
     if self.connected:
+      self.connected = False
+      self.flushQueue()
       self.transport.unregisterProducer()
       self.transport.loseConnection()
-      self.connected = False
 
   def sendDatapoint(self, metric, datapoint):
     if self.paused:
       self.factory.enqueue(metric, datapoint)
       instrumentation.increment(self.queuedUntilReady)
-
-    elif self.factory.hasQueuedDatapoints():
-      self.factory.enqueue(metric, datapoint)
-      self.sendQueued()
-
     else:
       self._sendDatapoints([(metric, datapoint)])
 
@@ -64,7 +60,11 @@ class CarbonClientProtocol(Int32StringReceiver):
       self.factory.checkQueue()
 
   def sendQueued(self):
-    while (not self.paused) and self.factory.hasQueuedDatapoints():
+    if not self.connected:
+      return
+    if self.paused:
+      return
+    if self.factory.hasQueuedDatapoints():
       datapoints = self.factory.takeSomeFromQueue()
       self._sendDatapoints(datapoints)
 
@@ -77,10 +77,19 @@ class CarbonClientProtocol(Int32StringReceiver):
             state.metricReceiversPaused):
           log.clients('%s resuming paused clients' % self)
           events.resumeReceivingMetrics()
+      reactor.callLater(0.00000001, self.sendQueued)
+
+  def flushQueue(self):
+    while self.factory.hasQueuedDatapoints():
+      datapoints = self.factory.takeSomeFromQueue()
+      self._sendDatapoints(datapoints)
 
   def __str__(self):
     return 'CarbonClientProtocol(%s:%d:%s)' % (self.factory.destination)
   __repr__ = __str__
+
+  def __nonzero__(self):
+    return self.connected
 
 
 class CarbonClientFactory(ReconnectingClientFactory):
@@ -110,7 +119,7 @@ class CarbonClientFactory(ReconnectingClientFactory):
 
   def queueFullCallback(self, result):
     log.clients('%s send queue is full (%d datapoints)' % (self, result))
-    
+
   def queueSpaceCallback(self, result):
     if self.queueFull.called:
       log.clients('%s send queue has space available' % self.connectedProtocol)

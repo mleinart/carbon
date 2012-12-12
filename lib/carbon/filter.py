@@ -22,7 +22,6 @@ class FilterProcessor(Processor):
   plugin_name = 'filter'
 
   def process(self, metric, datapoint):
-<<<<<<< HEAD
     t = time.time()
     for metric_filter in FilterRuleManager.filters:
       if metric_filter.action == 'allow':

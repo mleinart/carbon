@@ -139,13 +139,32 @@ WHISPER_AUTOFLUSH = False
 # useful for testing
 # AMQP_VERBOSE = False
 
+# Hostname or IP of AMQP broker
 # AMQP_HOST = localhost
+
+# Port of AMQP broker
 # AMQP_PORT = 5672
+
+# AMQP virtual host namespace
 # AMQP_VHOST = /
+
+# AMQP username
 # AMQP_USER = guest
+
+# AMQP password
 # AMQP_PASSWORD = guest
+
+# AMQP exchange name
 # AMQP_EXCHANGE = graphite
+
+# Set this to True to get metric name from the message body. In this case,
+# messages will be of the form: <metric name> <metric value> <timestamp>
+# Otherwise, metric name will be read from the message's routing-key and the
+# message body will be expected as: <metric value> <timestamp>
 # AMQP_METRIC_NAME_IN_BODY = False
+
+# Path to custom amqp specification xml
+# AMQP_SPEC =
 
 # The manhole interface allows you to SSH into the carbon daemon
 # and get a python interpreter. BE CAREFUL WITH THIS! If you do

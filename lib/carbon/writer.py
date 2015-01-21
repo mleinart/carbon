@@ -27,6 +27,7 @@ from carbon.util import TokenBucket
 
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
+from twisted.internet.threads import blockingCallFromThread
 from twisted.application.service import Service
 
 try:
@@ -59,7 +60,7 @@ def optimalWriteOrder():
   """Generates metrics with the most cached values first and applies a soft
   rate limit on new metrics"""
   while MetricCache:
-    (metric, datapoints) = MetricCache.pop()
+    (metric, datapoints) = blockingCallFromThread(reactor, MetricCache.pop)
     if state.cacheTooFull and MetricCache.size < CACHE_SIZE_LOW_WATERMARK:
       events.cacheSpaceAvailable()
 

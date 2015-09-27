@@ -87,21 +87,21 @@ class AggregationMetricBufferTest(TestCase):
     interval_buffer_mock.return_value.input.assert_called_once_with((120, 1.0))
 
   @patch("time.time", new=Mock(return_value=600))
-  @patch("carbon.state.events.metricGenerated")
+  @patch("carbon.events.metricGenerated")
   def test_compute_value_flushes_active_buffer(self, metric_generated_mock):
     self.metric_buffer.input((600, 1.0))
     self.metric_buffer.compute_value()
     metric_generated_mock.assert_called_once_with("carbon.foo.bar", (600, 1.0))
 
   @patch("time.time", new=Mock(return_value=600))
-  @patch("carbon.state.events.metricGenerated")
+  @patch("carbon.events.metricGenerated")
   def test_compute_value_uses_interval_for_flushed_datapoint(self, metric_generated_mock):
     self.metric_buffer.input((630, 1.0))
     self.metric_buffer.compute_value()
     metric_generated_mock.assert_called_once_with("carbon.foo.bar", (600, 1.0))
 
   @patch("time.time", new=Mock(return_value=600))
-  @patch("carbon.state.events.metricGenerated", new=Mock())
+  @patch("carbon.events.metricGenerated", new=Mock())
   def test_compute_value_marks_buffer_inactive(self):
     interval_buffer = IntervalBuffer(600)
     interval_buffer.input((600, 1.0))
@@ -112,7 +112,7 @@ class AggregationMetricBufferTest(TestCase):
       mark_inactive_mock.assert_called_once_with()
 
   @patch("time.time", new=Mock(return_value=600))
-  @patch("carbon.state.events.metricGenerated", new=Mock())
+  @patch("carbon.events.metricGenerated", new=Mock())
   def test_compute_value_computes_aggregate(self):
     interval_buffer = IntervalBuffer(600)
     interval_buffer.input((600, 1.0))
@@ -125,7 +125,7 @@ class AggregationMetricBufferTest(TestCase):
       aggregation_func_mock.assert_called_once_with([1.0, 2.0, 3.0])
 
   @patch("time.time", new=Mock(return_value=600))
-  @patch("carbon.state.events.metricGenerated")
+  @patch("carbon.events.metricGenerated")
   def test_compute_value_skips_inactive_buffers(self, metric_generated_mock):
     interval_buffer = IntervalBuffer(600)
     interval_buffer.input((600, 1.0))
@@ -135,7 +135,7 @@ class AggregationMetricBufferTest(TestCase):
     self.metric_buffer.compute_value()
     self.assertFalse(metric_generated_mock.called)
 
-  @patch("carbon.state.events.metricGenerated")
+  @patch("carbon.events.metricGenerated")
   def test_compute_value_can_flush_interval_multiple_times(self, metric_generated_mock):
     interval_buffer = IntervalBuffer(600)
     interval_buffer.input((600, 1.0))
@@ -155,7 +155,7 @@ class AggregationMetricBufferTest(TestCase):
 
       metric_generated_mock.assert_has_calls(calls)
 
-  @patch("carbon.state.events.metricGenerated")
+  @patch("carbon.events.metricGenerated")
   def test_compute_value_doesnt_flush_unchanged_interval_many_times(self, metric_generated_mock):
     interval_buffer = IntervalBuffer(600)
     interval_buffer.input((600, 1.0))

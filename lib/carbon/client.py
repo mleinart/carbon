@@ -196,7 +196,7 @@ class CarbonClientFactory(ReconnectingClientFactory):
       self.connectedProtocol.sendQueued()
 
   def queueFullCallback(self, result):
-    state.events.cacheFull()
+    events.cacheFull()
     log.clients('%s send queue is full (%d datapoints)' % (self, result))
 
   def queueSpaceCallback(self, result):
@@ -204,7 +204,7 @@ class CarbonClientFactory(ReconnectingClientFactory):
       log.clients('%s send queue has space available' % self.connectedProtocol)
       self.queueFull = Deferred()
       self.queueFull.addCallback(self.queueFullCallback)
-      state.events.cacheSpaceAvailable()
+      events.cacheSpaceAvailable()
     self.queueHasSpace = Deferred()
     self.queueHasSpace.addCallback(self.queueSpaceCallback)
 

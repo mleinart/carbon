@@ -40,7 +40,7 @@ class BroadcastRouter(DatapointRouter):
       yield destination
 
 
-@patch('carbon.state.instrumentation', Mock(spec=instrumentation))
+@patch('carbon.instrumentation', Mock(spec=instrumentation))
 class ConnectedCarbonClientProtocolTest(TestCase):
   def setUp(self):
     carbon_client.settings = TestSettings()  # reset to defaults
@@ -60,7 +60,7 @@ class ConnectedCarbonClientProtocolTest(TestCase):
     return deferLater(reactor, 0.1, assert_sent)
 
 
-@patch('carbon.state.instrumentation', Mock(spec=instrumentation))
+@patch('carbon.instrumentation', Mock(spec=instrumentation))
 class CarbonClientFactoryTest(TestCase):
   def setUp(self):
     self.protocol_mock = Mock(spec=CarbonClientProtocol)
@@ -97,7 +97,7 @@ class CarbonClientFactoryTest(TestCase):
     self.protocol_mock.sendQueued.assert_called_once_with()
 
 
-@patch('carbon.state.instrumentation', Mock(spec=instrumentation))
+@patch('carbon.instrumentation', Mock(spec=instrumentation))
 class CarbonClientManagerTest(TestCase):
   timeout = 1.0
   def setUp(self):
